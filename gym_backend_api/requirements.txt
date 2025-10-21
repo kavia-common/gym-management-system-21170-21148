@@ -48,3 +48,5 @@ psycopg[binary]==3.2.4
 passlib[bcrypt]==1.7.4
 PyJWT==2.10.1
 stripe==11.5.0
+google-auth==2.37.0
+httpx==0.28.1

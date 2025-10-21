@@ -8,6 +8,7 @@ from src.api.routers import classes as classes_router
 from src.api.routers import trainers as trainers_router
 from src.api.routers import bookings as bookings_router
 from src.api.routers import payments as payments_router
+from src.api.routers import google_auth as google_auth_router
 
 settings = get_settings()
 
@@ -54,3 +55,4 @@ app.include_router(classes_router.router, prefix="/api/v1")
 app.include_router(trainers_router.router, prefix="/api/v1")
 app.include_router(bookings_router.router, prefix="/api/v1")
 app.include_router(payments_router.router, prefix="/api/v1")
+app.include_router(google_auth_router.router, prefix="/api/v1")

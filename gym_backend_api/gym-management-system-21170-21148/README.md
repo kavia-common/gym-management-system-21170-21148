@@ -1,5 +1,11 @@
 # gym-management-system-21170-21148
 
+Backend supports Google Sign-In (OAuth and One Tap). Configure in `gym_backend_api/.env`:
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_OAUTH_REDIRECT_URI (e.g., http://localhost:3001/api/v1/auth/google/callback)
+See backend README for full setup and endpoints.
+
 This repository contains a full-stack gym management system. The backend is built with FastAPI and includes a database layer using SQLAlchemy with an SQLite default and optional PostgreSQL support.
 
 ## Backend: API Overview
@@ -44,6 +50,33 @@ Copy `.env.example` to `.env` inside `gym_backend_api` and adjust values as need
 - STRIPE_SECRET_KEY=sk_test_xxx
 - STRIPE_WEBHOOK_SECRET=whsec_xxx
 - CURRENCY=usd
+
+#### Google Sign-In (OAuth and One Tap)
+To enable Google authentication:
+
+1. In Google Cloud Console, create OAuth 2.0 Client ID (Web application).
+2. Authorized JavaScript origins: include your frontend URL(s), e.g.
+   - http://localhost:3000
+3. Authorized redirect URIs: include your backend callback URL, e.g.
+   - http://localhost:3001/api/v1/auth/google/callback
+4. Set the env vars in `gym_backend_api/.env`:
+   - GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+   - GOOGLE_CLIENT_SECRET=your_client_secret
+   - GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3001/api/v1/auth/google/callback
+
+Endpoints:
+- GET /api/v1/auth/google/login
+  - Returns { authorization_url } to redirect the user to Google.
+- GET /api/v1/auth/google/callback?code=...
+  - Server-side exchange of code for tokens, verifies the ID token, finds/creates user, then returns app tokens.
+- POST /api/v1/auth/google/one-tap
+  - Body: { "credential": "<Google ID token from GIS>" }
+  - Verifies token and returns app tokens.
+
+Notes:
+- We use google-auth to verify ID tokens and validate audience equals your GOOGLE_CLIENT_ID and email_verified is true.
+- A local user is created by email if none exists, with role=member and a generated password hash (not used for Google login).
+- The app issues access and refresh JWTs using existing security utilities.
 
 Notes:
 - If `DATABASE_URL` is not set, the backend falls back to `DATABASE_URL_SQLITE` (defaults to `sqlite:///./app.db`).

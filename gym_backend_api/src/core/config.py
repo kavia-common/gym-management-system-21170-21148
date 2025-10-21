@@ -44,6 +44,14 @@ class Settings(BaseModel):
     STRIPE_WEBHOOK_SECRET: Optional[str] = Field(default=os.getenv("STRIPE_WEBHOOK_SECRET"))
     CURRENCY: str = Field(default=os.getenv("CURRENCY", "usd"))
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = Field(default=os.getenv("GOOGLE_CLIENT_ID"), description="Google OAuth Client ID")
+    GOOGLE_CLIENT_SECRET: Optional[str] = Field(default=os.getenv("GOOGLE_CLIENT_SECRET"), description="Google OAuth Client Secret")
+    GOOGLE_OAUTH_REDIRECT_URI: Optional[str] = Field(
+        default=os.getenv("GOOGLE_OAUTH_REDIRECT_URI"),
+        description="Backend redirect URI for Google OAuth (e.g., http://localhost:3001/api/v1/auth/google/callback)",
+    )
+
     # Derived settings
     def cors_origins(self) -> List[str]:
         """Return list of allowed CORS origins based on env settings."""
