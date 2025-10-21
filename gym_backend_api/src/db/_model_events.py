@@ -4,6 +4,14 @@ from sqlalchemy import event
 from sqlalchemy.orm import Mapper
 
 from .models import User
+from .workout_models import (
+    Exercise,
+    WorkoutTemplate,
+    TemplateExercise,
+    Program,
+    ProgramDay,
+    ProgramDayExercise,
+)
 
 
 def _set_updated_at(mapper: Mapper, connection, target):
@@ -15,3 +23,8 @@ def _set_updated_at(mapper: Mapper, connection, target):
 # Register events for User timestamps
 event.listen(User, "before_insert", _set_updated_at)
 event.listen(User, "before_update", _set_updated_at)
+
+# Register events for workout programming models
+for _model in (Exercise, WorkoutTemplate, TemplateExercise, Program, ProgramDay, ProgramDayExercise):
+    event.listen(_model, "before_insert", _set_updated_at)
+    event.listen(_model, "before_update", _set_updated_at)

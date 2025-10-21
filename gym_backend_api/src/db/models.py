@@ -17,6 +17,13 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from .session import Base
+# Import workout models module to ensure metadata includes these tables when Base.metadata.create_all runs.
+# This is a safe, optional import for side-effect registration; individual classes are defined in workout_models.py
+try:
+    from . import workout_models  # noqa: F401
+except Exception:
+    # Avoid hard failure if module not yet available during certain tooling phases
+    pass
 
 
 class UserRole(str, Enum):

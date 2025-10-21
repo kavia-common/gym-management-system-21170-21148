@@ -73,6 +73,7 @@ def maybe_create_database_tables():
     if app_env == "development" or test_mode:
         # Import models here to ensure they are registered with Base before create_all
         from src.db import models  # noqa: F401
+        from src.db import workout_models  # noqa: F401
 
         Base.metadata.create_all(bind=_engine)
 
