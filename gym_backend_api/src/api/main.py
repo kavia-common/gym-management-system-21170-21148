@@ -29,6 +29,10 @@ app = FastAPI(
 
 # CORS setup
 allow_origins = settings.cors_origins()
+# Include Kavia/Vercel-style preview wildcard note:
+# If you deploy previews on custom subdomains, set CORS_ALLOW_ORIGINS to a comma-separated list.
+# Example:
+# CORS_ALLOW_ORIGINS=http://localhost:3000,https://*.beta01.cloud.kavia.ai,https://*.vercel.app
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins if allow_origins else ["*"],

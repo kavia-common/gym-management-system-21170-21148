@@ -30,10 +30,13 @@ Copy `.env.example` to `.env` inside `gym_backend_api` and adjust values as need
 - API_PORT=3001
 - FRONTEND_URL=http://localhost:3000
 - CORS_ALLOW_ORIGINS=http://localhost:3000
+  - Tip: Add preview domains if applicable, e.g.
+    `CORS_ALLOW_ORIGINS=http://localhost:3000,https://*.beta01.cloud.kavia.ai,https://*.vercel.app`
 - SECRET_KEY=change_me
 - ACCESS_TOKEN_EXPIRE_MINUTES=60
 - REFRESH_TOKEN_EXPIRE_DAYS=7
 - TEST_MODE=true
+  - When true and no Stripe keys are provided, payment flows use mock sessions and simplified confirms.
 - DATABASE_URL=postgresql+psycopg://user:password@localhost:5432/gymdb
 - DATABASE_URL_SQLITE=sqlite:///./app.db
 - DB_ECHO=false
@@ -45,6 +48,13 @@ Copy `.env.example` to `.env` inside `gym_backend_api` and adjust values as need
 Notes:
 - If `DATABASE_URL` is not set, the backend falls back to `DATABASE_URL_SQLITE` (defaults to `sqlite:///./app.db`).
 - When `APP_ENV=development` or `TEST_MODE=true`, tables are auto-created at startup, so you can run locally without manual migrations.
+
+### Regenerate OpenAPI
+To regenerate the OpenAPI schema after modifying routes, run from the `gym_backend_api` folder:
+```
+python -m src.api.generate_openapi
+```
+This writes to `interfaces/openapi.json`.
 
 ### Running the Backend with SQLite (default)
 
