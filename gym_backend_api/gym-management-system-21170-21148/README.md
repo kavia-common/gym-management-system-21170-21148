@@ -23,6 +23,26 @@ This repository contains a full-stack gym management system. The backend is buil
 - Bookings: `/api/v1/bookings/*` (class/trainer bookings)
 - Payments: `/api/v1/payments/*` (create session, confirm [TEST_MODE], stripe webhook stub)
 
+## Supabase JWT Authentication (Backend)
+
+The backend can validate Supabase-issued JWTs using the JWKS from your Supabase project.
+
+- Required environment variable:
+  - SUPABASE_URL (e.g., https://your-project.supabase.co)
+
+At startup, the app ensures SUPABASE_URL is set. Incoming requests can use Authorization: Bearer <supabase-access-token>. The dependency will:
+
+- Fetch JWKS from `${SUPABASE_URL}/auth/v1/keys` and cache it with TTL.
+- Verify signature and standard claims (issuer; audience if present).
+- Expose claims (including `sub` and `email` if present).
+
+Usage in routes:
+- Import the dependency alias: `from src.dependencies import auth_required`
+- Add to route parameters: `claims: dict = Depends(auth_required)`
+- `claims["sub"]` is the Supabase user id (UUID). `claims.get("email")` may be present.
+
+Note: Existing username/password endpoints remain for the local user system. You can migrate protected routes to Supabase by switching dependency from `get_current_user` to `auth_required`.
+
 ## Backend: Database Setup
 
 - Default: SQLite (no external service required). A local `app.db` file will be created in the `gym_backend_api` directory.
@@ -50,6 +70,7 @@ Copy `.env.example` to `.env` inside `gym_backend_api` and adjust values as need
 - STRIPE_SECRET_KEY=sk_test_xxx
 - STRIPE_WEBHOOK_SECRET=whsec_xxx
 - CURRENCY=usd
+- SUPABASE_URL=https://your-project.supabase.co  <-- required for Supabase JWT validation
 
 #### Google Sign-In (OAuth and One Tap)
 To enable Google authentication:
@@ -92,7 +113,7 @@ This writes to `interfaces/openapi.json`.
 ### Running the Backend with SQLite (default)
 
 1. Ensure dependencies are installed:
-   - In `gym_backend_api/requirements.txt`, SQLAlchemy, Alembic, psycopg[binary], passlib[bcrypt], PyJWT, stripe are included.
+   - In `gym_backend_api/requirements.txt`, SQLAlchemy, Alembic, psycopg[binary], passlib[bcrypt], PyJWT, stripe, python-jose[cryptography], httpx are included.
 2. Create `.env` in `gym_backend_api` (copy from `.env.example`).
 3. Start the backend (e.g., via `uvicorn src.api.main:app --host 0.0.0.0 --port 3001` or your existing run command).
 

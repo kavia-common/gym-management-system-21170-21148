@@ -10,6 +10,10 @@ from src.api.routers import bookings as bookings_router
 from src.api.routers import payments as payments_router
 from src.api.routers import google_auth as google_auth_router
 
+# Import dependencies to ensure SUPABASE_URL is validated at startup
+# and to make `auth_required` available for routers.
+from src import dependencies as shared_dependencies  # noqa: F401
+
 settings = get_settings()
 
 openapi_tags = [

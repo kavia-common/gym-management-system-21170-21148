@@ -50,3 +50,4 @@ PyJWT==2.10.1
 stripe==11.5.0
 google-auth==2.37.0
 httpx==0.28.1
+python-jose[cryptography]==3.3.0
