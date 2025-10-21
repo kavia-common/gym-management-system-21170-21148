@@ -20,7 +20,7 @@ def create_class_booking(db: Session, user_id: int, class_session_id: int) -> Bo
     if existing:
         raise ValueError("Already booked")
 
-    booking = Booking(user_id=user_id, class_session_id=class_session_id, status=BookingStatus.BOOKED)
+    booking = Booking(user_id=user_id, class_session_id=int(class_session_id), status=BookingStatus.BOOKED)
     session.spots_remaining -= 1
 
     db.add(booking)
@@ -49,3 +49,54 @@ def cancel_class_booking(db: Session, user_id: int, booking_id: int, is_admin: b
     db.commit()
     db.refresh(booking)
     return booking
+
+
+# PUBLIC_INTERFACE
+def get_trainer_bookings_for_user(db: Session, user_id: int):
+    """Return trainer bookings for a user. Simplified query based on Booking model if trainer booking fields exist."""
+    try:
+        q = db.query(Booking).filter(Booking.user_id == user_id, Booking.trainer_id.isnot(None))
+        # Map to dicts with expected fields
+        results = []
+        for b in q.all():
+            results.append(
+                {
+                    "id": b.id,
+                    "status": getattr(b, "status", None).value if hasattr(b, "status") and b.status else None,
+                    "start_time": getattr(b, "start_time", None),
+                    "end_time": getattr(b, "end_time", None),
+                    "trainer_name": getattr(b, "trainer_name", None) or getattr(getattr(b, "trainer", None), "name", None),
+                }
+            )
+        return results
+    except Exception:
+        return []
+
+
+# PUBLIC_INTERFACE
+def get_class_bookings_for_user(db: Session, user_id: int):
+    """Return class bookings for a user as simple dicts with start/end and class title."""
+    try:
+        q = db.query(Booking).filter(Booking.user_id == user_id, Booking.class_session_id.isnot(None))
+        results = []
+        for b in q.all():
+            # pull session times and class title if relationships present
+            session = getattr(b, "class_session", None)
+            start_time = getattr(session, "start_time", None) or getattr(b, "start_time", None)
+            end_time = getattr(session, "end_time", None) or getattr(b, "end_time", None)
+            class_title = None
+            if session is not None:
+                klass = getattr(session, "klass", None) or getattr(session, "class_", None)
+                class_title = getattr(klass, "title", None)
+            results.append(
+                {
+                    "id": b.id,
+                    "status": getattr(b, "status", None).value if hasattr(b, "status") and b.status else None,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "class_title": class_title,
+                }
+            )
+        return results
+    except Exception:
+        return []

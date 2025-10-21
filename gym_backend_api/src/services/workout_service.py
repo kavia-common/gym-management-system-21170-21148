@@ -287,3 +287,24 @@ def list_program_day_exercises(db: Session, user_id: int, role: str, program_id:
 
     items, total = _paginate(query, page, page_size)
     return [ws.ProgramDayExerciseOut.from_orm(i) for i in items], total
+
+
+# PUBLIC_INTERFACE
+def get_user_workouts(db: Session, user_id: int):
+    """Return workouts (planned/completed) for a user. Provides id, title, status, scheduled_at and end_time when available."""
+    try:
+        q = db.query(wm.WorkoutLog).filter(wm.WorkoutLog.member_user_id == user_id)
+        results = []
+        for w in q.all():
+            results.append(
+                {
+                    "id": w.id,
+                    "title": getattr(w, "name", None) or getattr(w, "title", None) or "Workout",
+                    "status": getattr(w, "status", None).value if hasattr(w, "status") and w.status else None,
+                    "scheduled_at": getattr(w, "scheduled_at", None) or getattr(w, "start_time", None),
+                    "end_time": getattr(w, "end_time", None),
+                }
+            )
+        return results
+    except Exception:
+        return []

@@ -13,6 +13,7 @@ from src.api.routers import supabase_protected as supabase_protected_router
 from src.api.routers import workouts as workouts_router  # new
 from src.api.routers import progress as progress_router
 from src.api.routers import notifications as notifications_router
+from src.api.routers import schedule as schedule_router
 
 # Import dependencies to ensure SUPABASE_URL is validated at startup
 # and to make `auth_required` available for routers.
@@ -30,6 +31,7 @@ openapi_tags = [
     {"name": "Workouts", "description": "Exercises, templates, and training programs"},
     {"name": "Progress", "description": "Exercise logs and body metrics tracking"},
     {"name": "Notifications", "description": "In-app notifications and reminders"},
+    {"name": "Schedule", "description": "Unified per-user schedule"},
 ]
 
 app = FastAPI(
@@ -75,3 +77,5 @@ app.include_router(supabase_protected_router.router)
 app.include_router(progress_router.router)
 # Notifications endpoints (in-app notifications and scheduler)
 app.include_router(notifications_router.router)
+# Schedule endpoint (unified per-user schedule)
+app.include_router(schedule_router.router)
