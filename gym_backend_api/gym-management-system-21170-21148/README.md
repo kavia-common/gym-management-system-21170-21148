@@ -1,6 +1,21 @@
 # gym-management-system-21170-21148
 
-This repository contains a full-stack gym management system. The backend is built with FastAPI and now includes a database layer using SQLAlchemy with an SQLite default and optional PostgreSQL support.
+This repository contains a full-stack gym management system. The backend is built with FastAPI and includes a database layer using SQLAlchemy with an SQLite default and optional PostgreSQL support.
+
+## Backend: API Overview
+
+- Base URL: `http://localhost:3001`
+- API prefix: `/api/v1`
+- OpenAPI docs: `http://localhost:3001/docs`
+- Health check: `GET /`
+
+### Domains
+- Auth: `/api/v1/auth/*` (signup, login, refresh, logout, me)
+- Memberships: `/api/v1/memberships/*` (plans CRUD [admin], subscribe/cancel/current)
+- Classes: `/api/v1/classes/*` (classes CRUD, sessions CRUD/list)
+- Trainers: `/api/v1/trainers/*` (trainers CRUD, availability)
+- Bookings: `/api/v1/bookings/*` (class/trainer bookings)
+- Payments: `/api/v1/payments/*` (create session, confirm [TEST_MODE], stripe webhook stub)
 
 ## Backend: Database Setup
 
@@ -34,7 +49,7 @@ Notes:
 ### Running the Backend with SQLite (default)
 
 1. Ensure dependencies are installed:
-   - In `gym_backend_api/requirements.txt`, SQLAlchemy, Alembic, psycopg[binary], passlib[bcrypt], and PyJWT are included.
+   - In `gym_backend_api/requirements.txt`, SQLAlchemy, Alembic, psycopg[binary], passlib[bcrypt], PyJWT, stripe are included.
 2. Create `.env` in `gym_backend_api` (copy from `.env.example`).
 3. Start the backend (e.g., via `uvicorn src.api.main:app --host 0.0.0.0 --port 3001` or your existing run command).
 
@@ -59,6 +74,12 @@ Then configure the `sqlalchemy.url` in `alembic.ini` or load from environment.
 
 ## Code Pointers
 
+- App entry: `gym_backend_api/src/api/main.py`
+- Routers: `gym_backend_api/src/api/routers/*`
+- Settings: `gym_backend_api/src/core/config.py`
+- Security: `gym_backend_api/src/core/security.py`
+- Services: `gym_backend_api/src/services/*`
+- Schemas: `gym_backend_api/src/schemas/*`
 - Database session and engine: `gym_backend_api/src/db/session.py`
 - Models: `gym_backend_api/src/db/models.py`
 - Exports: `gym_backend_api/src/db/__init__.py`
