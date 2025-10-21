@@ -5,6 +5,7 @@ from src.api.main import app
 
 """
 Generates a fresh OpenAPI schema JSON after all routers are registered.
+Includes /api/me role field from local RBAC mapping.
 """
 
 def generate():

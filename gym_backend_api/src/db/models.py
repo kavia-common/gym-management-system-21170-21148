@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    Index,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
@@ -47,15 +48,33 @@ class PaymentStatus(str, Enum):
 
 # PUBLIC_INTERFACE
 class User(Base):
-    """User accounts: gym members, trainers, and admins."""
+    """User accounts: gym members, trainers, and admins.
+
+    Persisted mapping between local user and Supabase identity:
+    - supabase_user_id: UUID (string) from Supabase JWT 'sub', unique when present
+    - email: used for legacy/local auth and for mapping when Supabase provides email
+    """
 
     __tablename__ = "users"
+    __table_args__ = (
+        UniqueConstraint("email", name="uq_users_email"),
+        UniqueConstraint("supabase_user_id", name="uq_users_supabase_user_id"),
+        Index("ix_users_supabase_user_id", "supabase_user_id"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+
+    # Supabase subject (UUID as string). Nullable to maintain compatibility with existing local users.
+    supabase_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=False, default=UserRole.MEMBER)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
 
     # Relationships
     memberships: Mapped[list["Membership"]] = relationship("Membership", back_populates="user", cascade="all, delete-orphan")

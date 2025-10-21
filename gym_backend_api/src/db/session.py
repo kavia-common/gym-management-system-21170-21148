@@ -78,4 +78,11 @@ def maybe_create_database_tables():
 
 
 # Ensure tables are created in dev/test upon import if conditions met.
+# Register model events (like updated_at management) before potential create_all to avoid side effects.
+try:
+    from src.db import _model_events  # noqa: F401
+except Exception:
+    # Safe to ignore if any import-time issues occur during initial setups
+    pass
+
 maybe_create_database_tables()
