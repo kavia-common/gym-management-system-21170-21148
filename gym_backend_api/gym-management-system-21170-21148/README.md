@@ -13,7 +13,7 @@ This repository contains a full-stack gym management system. The backend is buil
 - Base URL: `http://localhost:3001`
 - API prefix: `/api/v1`
 - OpenAPI docs: `http://localhost:3001/docs`
-- Health check: `GET /`
+- Health check (readiness): `GET /healthz` returns `{"status":"ok"}`
 
 ### Domains
 - Auth: `/api/v1/auth/*` (signup, login, refresh, logout, me)
@@ -115,7 +115,9 @@ This writes to `interfaces/openapi.json`.
 1. Ensure dependencies are installed:
    - In `gym_backend_api/requirements.txt`, SQLAlchemy, Alembic, psycopg[binary], passlib[bcrypt], PyJWT, stripe, python-jose[cryptography], httpx are included.
 2. Create `.env` in `gym_backend_api` (copy from `.env.example`).
-3. Start the backend (e.g., via `uvicorn src.api.main:app --host 0.0.0.0 --port 3001` or your existing run command).
+3. Start the backend using one of:
+   - `python -m src.api` (recommended; binds 0.0.0.0 and port from API_PORT)
+   - `uvicorn src.api.main:app --host 0.0.0.0 --port 3001`
 
 You should see a local `app.db` created upon first start. OpenAPI docs: `http://localhost:3001/docs`.
 
@@ -139,6 +141,7 @@ Then configure the `sqlalchemy.url` in `alembic.ini` or load from environment.
 ## Code Pointers
 
 - App entry: `gym_backend_api/src/api/main.py`
+- Run entry: `python -m src.api` -> `src/api/__main__.py`
 - Routers: `gym_backend_api/src/api/routers/*`
 - Settings: `gym_backend_api/src/core/config.py`
 - Security: `gym_backend_api/src/core/security.py`

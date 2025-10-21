@@ -57,9 +57,26 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["Auth"], summary="Health Check", description="Return basic health status.")
-def health_check():
+# PUBLIC_INTERFACE
+@app.get("/", tags=["System"], summary="Root Health", description="Return basic health status for backward compatibility.")
+def root_health():
+    """Basic root health endpoint for legacy checks."""
     return {"message": "Healthy", "env": settings.APP_ENV}
+
+
+# PUBLIC_INTERFACE
+@app.get(
+    "/healthz",
+    tags=["System"],
+    summary="Health check",
+    description="Kubernetes/preview readiness probe. Returns {'status': 'ok'} when API is ready.",
+)
+def healthz():
+    """
+    Health check endpoint intended for readiness/liveness probes.
+    Returns 200 OK with a simple status payload.
+    """
+    return {"status": "ok", "env": settings.APP_ENV}
 
 
 # Mount routers under /api/v1
@@ -80,3 +97,16 @@ app.include_router(progress_router.router)
 app.include_router(notifications_router.router)
 # Schedule endpoint (unified per-user schedule)
 app.include_router(schedule_router.router)
+
+
+# Optional local run helper (not used by container orchestrator but helpful for docs)
+if __name__ == "__main__":
+    """
+    Convenience runner:
+    uvicorn src.api.main:app --host 0.0.0.0 --port ${API_PORT:-3001}
+    """
+    import os
+    import uvicorn
+
+    port = int(os.getenv("API_PORT", "3001"))
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=port, reload=False)
