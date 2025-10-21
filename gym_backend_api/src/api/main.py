@@ -11,6 +11,7 @@ from src.api.routers import payments as payments_router
 from src.api.routers import google_auth as google_auth_router
 from src.api.routers import supabase_protected as supabase_protected_router
 from src.api.routers import workouts as workouts_router  # new
+from src.api.routers import progress as progress_router
 
 # Import dependencies to ensure SUPABASE_URL is validated at startup
 # and to make `auth_required` available for routers.
@@ -26,11 +27,12 @@ openapi_tags = [
     {"name": "Bookings", "description": "Class and trainer bookings"},
     {"name": "Payments", "description": "Payment sessions and confirmations"},
     {"name": "Workouts", "description": "Exercises, templates, and training programs"},
+    {"name": "Progress", "description": "Exercise logs and body metrics tracking"},
 ]
 
 app = FastAPI(
     title="Gym Management API",
-    description="Backend API for a gym management system (memberships, classes, trainers, bookings, payments).",
+    description="Backend API for a gym management system (memberships, classes, trainers, bookings, payments, progress tracking).",
     version="1.0.0",
     openapi_tags=openapi_tags,
 )
@@ -67,3 +69,5 @@ app.include_router(google_auth_router.router, prefix="/api/v1")
 app.include_router(workouts_router.router)  # workouts has prefix="/api/v1/workouts"
 # Supabase-protected endpoints (JWT required via src.dependencies.auth_required)
 app.include_router(supabase_protected_router.router)
+# Progress tracking endpoints (exercise logs, body metrics)
+app.include_router(progress_router.router)
