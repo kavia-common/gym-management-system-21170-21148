@@ -1,166 +1,140 @@
-from __future__ import annotations
-
-from datetime import datetime
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
-from src.db.workout_models import Unit, ProgramStatus
 
-
-# PUBLIC_INTERFACE
-class ExerciseCreate(BaseModel):
-    """Create a catalog exercise."""
+class ExerciseBase(BaseModel):
     name: str = Field(..., description="Exercise name")
-    description: str | None = Field(default=None, description="Exercise description")
-    default_unit: Unit = Field(default=Unit.REPS, description="Default measurement unit")
+    description: Optional[str] = Field(None, description="Optional description")
+    category: Optional[str] = Field(None, description="Category or body part")
 
 
-# PUBLIC_INTERFACE
-class ExerciseOut(BaseModel):
-    """Exercise response."""
+class ExerciseCreate(ExerciseBase):
+    pass
+
+
+class ExerciseOut(ExerciseBase):
     id: int
-    name: str
-    description: str | None
-    default_unit: Unit
-    created_at: datetime
-    updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-# PUBLIC_INTERFACE
-class TemplateExerciseCreate(BaseModel):
-    """Exercise prescription inside a workout template."""
-    exercise_id: int = Field(..., description="Exercise ID from catalog")
-    order_index: int = Field(default=0, ge=0)
-    sets: int | None = Field(default=None, ge=0)
-    reps: int | None = Field(default=None, ge=0)
-    load_value: int | None = Field(default=None, ge=0)
-    load_unit: Unit | None = Field(default=None)
-    duration_seconds: int | None = Field(default=None, ge=0)
-    notes: str | None = Field(default=None)
+class PaginatedExercises(BaseModel):
+    items: List[ExerciseOut]
+    total: int
+    page: int
+    page_size: int
 
 
-# PUBLIC_INTERFACE
-class TemplateExerciseOut(BaseModel):
-    """Template exercise response."""
+class TemplateExerciseBase(BaseModel):
+    exercise_id: int = Field(..., description="Exercise ID")
+    sets: int = Field(..., description="Number of sets")
+    reps: int = Field(..., description="Target reps")
+    rest_seconds: Optional[int] = Field(None, description="Rest in seconds between sets")
+    notes: Optional[str] = Field(None, description="Coach notes")
+
+
+class TemplateExerciseCreate(TemplateExerciseBase):
+    pass
+
+
+class TemplateExerciseOut(TemplateExerciseBase):
     id: int
     template_id: int
-    exercise_id: int
-    order_index: int
-    sets: int | None
-    reps: int | None
-    load_value: int | None
-    load_unit: Unit | None
-    duration_seconds: int | None
-    notes: str | None
-    created_at: datetime
-    updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-# PUBLIC_INTERFACE
-class WorkoutTemplateCreate(BaseModel):
-    """Create workout template."""
-    title: str = Field(..., description="Template title")
-    description: str | None = Field(default=None, description="Template description")
+class WorkoutTemplateBase(BaseModel):
+    name: str = Field(..., description="Template name")
+    goal: Optional[str] = Field(None, description="Intended goal (e.g., strength, hypertrophy)")
 
 
-# PUBLIC_INTERFACE
-class WorkoutTemplateOut(BaseModel):
-    """Workout template response."""
+class WorkoutTemplateCreate(WorkoutTemplateBase):
+    exercises: Optional[List[TemplateExerciseCreate]] = Field(default=None, description="Optional exercises to add")
+
+
+class WorkoutTemplateOut(WorkoutTemplateBase):
     id: int
-    title: str
-    description: str | None
-    created_at: datetime
-    updated_at: datetime
+    trainer_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-# PUBLIC_INTERFACE
+class PaginatedTemplates(BaseModel):
+    items: List[WorkoutTemplateOut]
+    total: int
+    page: int
+    page_size: int
+
+
 class ProgramCreate(BaseModel):
-    """Create a training program."""
-    title: str = Field(..., description="Program title")
-    description: str | None = Field(default=None)
-    status: ProgramStatus = Field(default=ProgramStatus.DRAFT)
-    assigned_to_user_id: int | None = Field(default=None, description="Assign to member user id")
+    name: str = Field(..., description="Program name")
+    member_user_id: int = Field(..., description="Assignee member user id")
+    template_id: Optional[int] = Field(None, description="Optional template to seed from")
+    notes: Optional[str] = Field(None, description="Notes for the program")
 
 
-# PUBLIC_INTERFACE
 class ProgramOut(BaseModel):
-    """Program response."""
     id: int
-    title: str
-    description: str | None
-    status: ProgramStatus
-    created_by_user_id: int | None
-    assigned_to_user_id: int | None
-    created_at: datetime
-    updated_at: datetime
+    name: str
+    member_user_id: int
+    trainer_id: int
+    notes: Optional[str]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-# PUBLIC_INTERFACE
+class PaginatedPrograms(BaseModel):
+    items: List[ProgramOut]
+    total: int
+    page: int
+    page_size: int
+
+
 class ProgramDayCreate(BaseModel):
-    """Create a day for a program."""
-    program_id: int
-    day_number: int = Field(default=1, ge=1)
-    title: str | None = None
-    notes: str | None = None
+    day_index: int = Field(..., description="Order of the day within the program (1-based)")
+    name: str = Field(..., description="Name for the day")
 
 
-# PUBLIC_INTERFACE
 class ProgramDayOut(BaseModel):
-    """Program day response."""
     id: int
     program_id: int
-    day_number: int
-    title: str | None
-    notes: str | None
-    created_at: datetime
-    updated_at: datetime
+    day_index: int
+    name: str
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-# PUBLIC_INTERFACE
+class PaginatedProgramDays(BaseModel):
+    items: List[ProgramDayOut]
+    total: int
+    page: int
+    page_size: int
+
+
 class ProgramDayExerciseCreate(BaseModel):
-    """Create exercise entry for a program day."""
-    program_day_id: int
-    order_index: int = Field(default=0, ge=0)
-    exercise_id: int | None = Field(default=None, description="Catalog exercise id")
-    template_id: int | None = Field(default=None, description="Workout template id")
-    sets: int | None = Field(default=None, ge=0)
-    reps: int | None = Field(default=None, ge=0)
-    load_value: int | None = Field(default=None, ge=0)
-    load_unit: Unit | None = Field(default=None)
-    duration_seconds: int | None = Field(default=None, ge=0)
-    notes: str | None = Field(default=None)
+    exercise_id: int = Field(..., description="Exercise id")
+    sets: int = Field(..., description="Sets")
+    reps: int = Field(..., description="Reps")
+    rest_seconds: Optional[int] = Field(None, description="Rest seconds")
+    notes: Optional[str] = Field(None, description="Notes")
 
 
-# PUBLIC_INTERFACE
-class ProgramDayExerciseOut(BaseModel):
-    """Program day exercise response."""
+class ProgramDayExerciseOut(ProgramDayExerciseCreate):
     id: int
     program_day_id: int
-    order_index: int
-    exercise_id: int | None
-    template_id: int | None
-    sets: int | None
-    reps: int | None
-    load_value: int | None
-    load_unit: Unit | None
-    duration_seconds: int | None
-    notes: str | None
-    created_at: datetime
-    updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+class PaginatedProgramDayExercises(BaseModel):
+    items: List[ProgramDayExerciseOut]
+    total: int
+    page: int
+    page_size: int
