@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from ...auth.supabase_jwt import get_current_user  # provides user dict with id, email, role
-from ...db import get_db
-from ...schemas.notification import NotificationCreate, NotificationListResponse, NotificationOut
-from ...services import notification_service
+from src.auth.supabase_jwt import get_current_user  # provides user dict with id, email, role
+from src.db import get_db
+from src.schemas.notification import NotificationCreate, NotificationListResponse, NotificationOut
+from src.services import notification_service
 
 router = APIRouter(
     prefix="/api/v1/notifications",

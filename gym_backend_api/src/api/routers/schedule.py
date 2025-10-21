@@ -3,10 +3,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel, Field
 
-from ...dependencies import get_db
-from ...auth.supabase_jwt import get_current_user
-from ...services.workout_service import WorkoutService
-from ...services.booking_service import BookingService
+from src.dependencies import get_db
+from src.auth.supabase_jwt import get_current_user
+from src.services.workout_service import WorkoutService
+from src.services.booking_service import BookingService
 # from ...services.class_service import ClassService
 
 router = APIRouter(prefix="/api/v1", tags=["Schedule"])

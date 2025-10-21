@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
-from ...dependencies import get_db, require_trainer, get_current_user
-from ...schemas import workout as ws
-from ...services import workout_service as svc
+from src.dependencies import get_db, require_trainer, get_current_user
+from src.schemas import workout as ws
+from src.services import workout_service as svc
 
 router = APIRouter(
     prefix="/api/v1/workouts",

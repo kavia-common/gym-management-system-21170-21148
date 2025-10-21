@@ -4,9 +4,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from ...auth.supabase_jwt import get_supabase_user  # returns dict with user_id, email, role
-from ...db.session import get_db
-from ...schemas.progress import (
+from src.auth.supabase_jwt import get_current_user as get_supabase_user  # returns dict with user_id, email, role
+from src.db.session import get_db
+from src.schemas.progress import (
     ExerciseLogCreate,
     ExerciseLogOut,
     BodyMetricsCreate,
