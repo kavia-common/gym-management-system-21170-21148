@@ -12,6 +12,7 @@ from . import (
     progress,
     notifications,
     schedule,
+    demo,
 )
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "progress",
     "notifications",
     "schedule",
+    "demo",
 ]

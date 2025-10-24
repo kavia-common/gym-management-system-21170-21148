@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.core.security import get_current_user, require_roles
+from src.core.security import get_current_user, require_roles, require_roles_demo_aware
 from src.db.models import User, UserRole
 from src.db.session import get_db
 from src.schemas.trainer import TrainerCreate, TrainerUpdate, TrainerOut, TrainerAvailabilityCreate, TrainerAvailabilityOut
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/trainers", tags=["Trainers"])
 
 
 @router.post("", response_model=TrainerOut, summary="Create trainer", description="Create trainer (admin only).")
-def create_trainer_endpoint(payload: TrainerCreate, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def create_trainer_endpoint(payload: TrainerCreate, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     return create_trainer(db, **payload.model_dump())
 
 
@@ -21,7 +21,7 @@ def list_trainers_endpoint(db: Session = Depends(get_db), _: User = Depends(get_
 
 
 @router.patch("/{trainer_id}", response_model=TrainerOut, summary="Update trainer", description="Update trainer (admin only).")
-def update_trainer_endpoint(trainer_id: int, payload: TrainerUpdate, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def update_trainer_endpoint(trainer_id: int, payload: TrainerUpdate, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     try:
         return update_trainer(db, trainer_id, **payload.model_dump())
     except ValueError as e:
@@ -29,7 +29,7 @@ def update_trainer_endpoint(trainer_id: int, payload: TrainerUpdate, db: Session
 
 
 @router.delete("/{trainer_id}", summary="Delete trainer", description="Delete trainer (admin only).")
-def delete_trainer_endpoint(trainer_id: int, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def delete_trainer_endpoint(trainer_id: int, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     try:
         delete_trainer(db, trainer_id)
         return {"detail": "Deleted"}
@@ -38,7 +38,7 @@ def delete_trainer_endpoint(trainer_id: int, db: Session = Depends(get_db), _: U
 
 
 @router.post("/availability", response_model=TrainerAvailabilityOut, summary="Add availability", description="Add availability slot for a trainer (admin or staff).")
-def add_availability_endpoint(payload: TrainerAvailabilityCreate, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN, UserRole.TRAINER]))):
+def add_availability_endpoint(payload: TrainerAvailabilityCreate, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN, UserRole.TRAINER]))):
     try:
         return add_availability(db, **payload.model_dump())
     except ValueError as e:

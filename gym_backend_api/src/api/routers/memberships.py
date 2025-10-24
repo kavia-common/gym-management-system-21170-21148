@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.core.security import require_roles, get_current_user
+from src.core.security import require_roles, get_current_user, require_roles_demo_aware
 from src.db.models import User, UserRole
 from src.db.session import get_db
 from src.schemas.membership import (
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/memberships", tags=["Memberships"])
 
 
 @router.post("/plans", response_model=MembershipPlanOut, summary="Create plan", description="Create a membership plan (admin only).")
-def create_membership_plan(payload: MembershipPlanCreate, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def create_membership_plan(payload: MembershipPlanCreate, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     return create_plan(db, **payload.model_dump())
 
 
@@ -35,7 +35,7 @@ def list_membership_plans(db: Session = Depends(get_db)):
 
 
 @router.patch("/plans/{plan_id}", response_model=MembershipPlanOut, summary="Update plan", description="Update a membership plan (admin only).")
-def update_membership_plan(plan_id: int, payload: MembershipPlanUpdate, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def update_membership_plan(plan_id: int, payload: MembershipPlanUpdate, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     try:
         return update_plan(db, plan_id, **payload.model_dump())
     except ValueError as e:
@@ -43,7 +43,7 @@ def update_membership_plan(plan_id: int, payload: MembershipPlanUpdate, db: Sess
 
 
 @router.delete("/plans/{plan_id}", summary="Delete plan", description="Delete a membership plan (admin only).")
-def delete_membership_plan(plan_id: int, db: Session = Depends(get_db), _: User = Depends(require_roles([UserRole.ADMIN]))):
+def delete_membership_plan(plan_id: int, db: Session = Depends(get_db), _: User = Depends(require_roles_demo_aware([UserRole.ADMIN]))):
     try:
         delete_plan(db, plan_id)
         return {"detail": "Deleted"}

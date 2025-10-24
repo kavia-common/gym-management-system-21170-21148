@@ -95,3 +95,16 @@ def require_roles(allowed_roles: List[UserRole]):
         return user
 
     return _inner
+
+
+# PUBLIC_INTERFACE
+def require_roles_demo_aware(allowed_roles: List[UserRole]):
+    """Like require_roles but allows any authenticated user when DEMO_MODE=true."""
+    async def _inner(user: User = Depends(get_current_user)) -> User:
+        settings = get_settings()
+        if getattr(settings, "DEMO_MODE", False):
+            return user
+        if user.role not in allowed_roles:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+        return user
+    return _inner

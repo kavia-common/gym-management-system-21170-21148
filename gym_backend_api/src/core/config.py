@@ -19,6 +19,10 @@ class Settings(BaseModel):
     CORS_ALLOW_ORIGINS: Optional[str] = Field(
         default=os.getenv("CORS_ALLOW_ORIGINS", ""), description="Comma-separated list of allowed origins"
     )
+    DEMO_MODE: bool = Field(
+        default=os.getenv("DEMO_MODE", "false").strip().lower() in {"1", "true", "yes", "on"},
+        description="Enable demo mode behaviors (seed data, relaxed permissions, mock payments)",
+    )
 
     # Security
     SECRET_KEY: str = Field(default=os.getenv("SECRET_KEY", "change_me"), description="JWT secret key")

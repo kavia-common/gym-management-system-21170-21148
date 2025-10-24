@@ -14,6 +14,7 @@ from src.api.routers import workouts as workouts_router  # new
 from src.api.routers import progress as progress_router
 from src.api.routers import notifications as notifications_router
 from src.api.routers import schedule as schedule_router
+from src.api.routers import demo as demo_router
 
 # Import dependencies to ensure SUPABASE_URL is validated at startup
 # and to make `auth_required` available for routers.
@@ -80,3 +81,27 @@ app.include_router(progress_router.router)
 app.include_router(notifications_router.router)
 # Schedule endpoint (unified per-user schedule)
 app.include_router(schedule_router.router)
+
+# Optional startup seeding when DEMO_MODE and DEMO_AUTO_SEED are enabled
+@app.on_event("startup")
+async def _maybe_seed_on_startup():
+    import os
+    if not settings.DEMO_MODE:
+        return
+    auto = os.getenv("DEMO_AUTO_SEED", "").strip().lower() in {"1", "true", "yes", "on"}
+    if not auto:
+        return
+    # Run seeding using a short-lived DB session
+    from src.db.session import SessionLocal
+    from src.api.routers.demo import seed_demo as _seed_fn
+    db = SessionLocal()
+    try:
+        # No authenticated user context here; will create demo users and default membership for member.demo
+        _seed_fn.__wrapped__(db=db, current_user=None)  # Call underlying function bypassing dependency injection
+    except Exception:
+        # Best-effort: do not crash startup on seed errors
+        pass
+    finally:
+        db.close()
+# Demo endpoints (seed/reset/mock payments)
+app.include_router(demo_router.router)
